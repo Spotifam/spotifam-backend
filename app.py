@@ -35,8 +35,7 @@ def getqueue():
     response = {}
 
     #TODO retrieve queue and insert 
-    else:
-        response["List"] = f"todo: actually return queue"
+    response["List"] = f"todo: actually return queue"
 
     # Return the response in json format
     return jsonify(response)
