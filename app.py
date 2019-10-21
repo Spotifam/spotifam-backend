@@ -8,7 +8,7 @@ app = Flask(__name__)
 @app.route('/createroom/', methods=['GET'])
 def createroom():
     # Retrieve the name from url parameter
-    name = request.args.get("room_id", None)
+    room_id = request.args.get("room_id", None)
 
     # For debugging
     print(f"got room_id: {room_id}")
@@ -29,8 +29,6 @@ def createroom():
 @app.route('/getqueue/', methods=['GET'])
 def getqueue():
     
-    # For debugging
-    print(f"got name {song_id}")
 
     response = {}
 
@@ -43,7 +41,7 @@ def getqueue():
 @app.route('/addsong/', methods=['GET'])
 def respond():
     # Retrieve the name from url parameter
-    name = request.args.get("song_id", None)
+    song_id = request.args.get("song_id", None)
 
     # For debugging
     print(f"got name {song_id}")
