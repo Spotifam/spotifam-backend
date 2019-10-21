@@ -3,31 +3,68 @@
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 
-@app.route('/getmsg/', methods=['GET'])
-def respond():
+
+
+@app.route('/createroom/', methods=['GET'])
+def createroom():
     # Retrieve the name from url parameter
-    name = request.args.get("name", None)
+    name = request.args.get("room_id", None)
 
     # For debugging
-    print(f"got name {name}")
+    print(f"got room_id: {room_id}")
 
     response = {}
 
     # Check if user sent a name at all
-    if not name:
-        response["ERROR"] = "no name found, please send a name."
-    # Check if the user entered a number not a name
-    elif str(name).isdigit():
-        response["ERROR"] = "name can't be numeric."
+    if not room_id:
+        response["ERROR"] = "no id found, please send a name."
+    #todo return if invalid songid
     # Now the user entered a valid name
     else:
-        response["MESSAGE"] = f"Welcome {name} to our awesome platform!!"
+        response["MESSAGE"] = f"Successfully recieved room_id"
+
+    # Return the response in json format
+    return jsonify(response)
+
+@app.route('/getqueue/', methods=['GET'])
+def getqueue():
+    
+    # For debugging
+    print(f"got name {song_id}")
+
+    response = {}
+
+    #TODO retrieve queue and insert 
+    else:
+        response["List"] = f"todo: actually return queue"
+
+    # Return the response in json format
+    return jsonify(response)
+
+@app.route('/addsong/', methods=['GET'])
+def respond():
+    # Retrieve the name from url parameter
+    name = request.args.get("song_id", None)
+
+    # For debugging
+    print(f"got name {song_id}")
+
+    response = {}
+
+    # Check if user sent a name at all
+    if not song_id:
+        response["ERROR"] = "no id found, please send a name."
+    #todo return if invalid songid
+    # Now the user entered a valid name
+    else:
+        response["MESSAGE"] = f"Successfully recieved song_id"
 
     # Return the response in json format
     return jsonify(response)
 
 @app.route('/post/', methods=['POST'])
 def post_something():
+    print(request)
     param = request.form.get('name')
     print(param)
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
