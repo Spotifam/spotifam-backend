@@ -1,5 +1,6 @@
 # app.py
 #https://stackabuse.com/deploying-a-flask-application-to-heroku/
+import requests
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 
@@ -58,6 +59,41 @@ def respond():
 
     # Return the response in json format
     return jsonify(response)
+
+@app.route('/search/', methods=['GET'])
+def search():
+    ### For testing
+    # (i) Get a spotify Oauth token from,
+    #     https://developer.spotify.com/console/get-search-item/
+    # 
+    # (ii) Send a get curl request with the parameters 
+    #      - [str] query: the song name to search for
+    #      - [str] auth: the users authorization token from spotify
+
+    print(request)
+    query = request.args.get('query', None)
+    auth  = request.args.get('auth',  None)
+
+    search_response = requests.get(
+        "https://api.spotify.com/v1/search",
+        params = {
+            'q'    :   query,
+            'type' : 'track',
+        },
+        headers = {
+            'Accept'        : 'application/json',
+            'Content-Type'  : 'application/json',
+            'Authorization' :   'Bearer ' + auth,
+        }
+    )
+
+    if search_response.status_code == 200:
+        return search_response.content
+    else:
+        return jsonify({
+            "ERROR"    :     search_response.status_code,
+            "MESSAGE:" : f"No results found for {query}",
+        })
 
 @app.route('/post/', methods=['POST'])
 def post_something():
