@@ -4,7 +4,10 @@ import requests
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 
-
+TEST_TOK = ""
+room_tokens = {
+    "test_room": TEST_TOK,
+}
 
 @app.route('/createroom/', methods=['GET'])
 def createroom():
@@ -19,7 +22,7 @@ def createroom():
     # Check if user sent a name at all
     if not room_id:
         response["ERROR"] = "no id found, please send a name."
-    #todo return if invalid songid
+    # todo return if invalid songid
     # Now the user entered a valid name
     else:
         response["MESSAGE"] = f"Successfully recieved room_id"
@@ -65,6 +68,7 @@ def search():
     ### For testing
     # (i) Get a spotify Oauth token from,
     #     https://developer.spotify.com/console/get-search-item/
+    #     then copy and paste in TEST_TOK.
     # 
     # (ii) Send a get curl request with the parameters 
     #      - [str] query: the song name to search for
@@ -72,7 +76,7 @@ def search():
 
     print(request)
     query = request.args.get('query', None)
-    auth  = request.args.get('auth',  None)
+    room  = request.args.get('room',  None)
 
     search_response = requests.get(
         "https://api.spotify.com/v1/search",
@@ -81,9 +85,9 @@ def search():
             'type' : 'track',
         },
         headers = {
-            'Accept'        : 'application/json',
-            'Content-Type'  : 'application/json',
-            'Authorization' :   'Bearer ' + auth,
+            'Accept'        :            'application/json',
+            'Content-Type'  :            'application/json',
+            'Authorization' : 'Bearer ' + room_tokens[room],
         }
     )
 
