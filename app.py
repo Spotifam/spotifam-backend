@@ -1,69 +1,117 @@
 # app.py
 #https://stackabuse.com/deploying-a-flask-application-to-heroku/
 import requests
+import random
+import string
+import json
+from room import Room
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
+
 app = Flask(__name__)
+cors = CORS(app, resources= {
+        r"/createroom":     {"origins": "*"},
+        r"/getqueue":       {"origins": "*"},
+        r"/search":         {"origins": "*"},
+        r"/updatequeue":    {"origins": "*"},
+        r"/addsong":        {"origins": "*"},
+    })
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 TEST_TOK = ""
-room_tokens = {
-    "test_room": TEST_TOK,
-}
+rooms = {}
+
+def generateRoomId():
+    return ''.join(random.choices(string.ascii_uppercase, k=4))
 
 @app.route('/createroom/', methods=['GET'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
 def createroom():
     # Retrieve the name from url parameter
-    room_id = request.args.get("room_id", None)
+    auth_tok = request.args.get("auth_tok", None)
+    print(auth_tok)
 
-    # For debugging
-    print(f"got room_id: {room_id}")
+    # Make sure the RoomID doesnt exist.
+    room_id = generateRoomId()
+    while room_id in rooms:
+        room_id = generateRoomId()
+
+    # Insert the new room into the list of rooms
+    room = Room(room_id, auth_tok)
+    rooms[room_id] = room
 
     response = {}
 
     # Check if user sent a name at all
-    if not room_id:
-        response["ERROR"] = "no id found, please send a name."
+    if not auth_tok:
+        response["ERROR"] = "Failed to create a room."
     # todo return if invalid songid
     # Now the user entered a valid name
     else:
-        response["MESSAGE"] = f"Successfully recieved room_id"
-
+        response["room"] = room_id
+    
+    print(rooms)
     # Return the response in json format
     return jsonify(response)
 
 @app.route('/getqueue/', methods=['GET'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
 def getqueue():
     
+    room_code = request.args.get("room_code", None)
 
     response = {}
 
-    #TODO retrieve queue and insert 
-    response["List"] = f"todo: actually return queue"
+    response["list"] = rooms[room_code].getQueue()
 
-    # Return the response in json format
     return jsonify(response)
 
-@app.route('/addsong/', methods=['GET'])
-def respond():
+@app.route('/updatequeue/', methods=['POST'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+def updatequeue():
     # Retrieve the name from url parameter
-    song_id = request.args.get("song_id", None)
+    queue = json.loads(request.form.get("queue", None))
+    room = request.form.get("room", None)
 
-    # For debugging
-    print(f"got name {song_id}")
+    rooms[room].updateQueue(queue)
 
     response = {}
 
     # Check if user sent a name at all
-    if not song_id:
-        response["ERROR"] = "no id found, please send a name."
+    if not queue:
+        response["ERROR"] = "no id found."
     #todo return if invalid songid
     # Now the user entered a valid name
     else:
-        response["MESSAGE"] = f"Successfully recieved song_id"
+        response["MESSAGE"] = f"Successfully updated queue."
+
+    # Return the response in json format
+    return jsonify(response)
+
+@app.route('/addsong/', methods=['POST'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+def addsong():
+    # Retrieve the name from url parameter
+    song = json.loads(request.form.get("song", None))
+    room = request.form.get("room", None)
+
+    rooms[room].addToQueue(song)
+
+    response = {}
+
+    # Check if user sent a name at all
+    if not song:
+        response["ERROR"] = "no id found."
+    #todo return if invalid songid
+    # Now the user entered a valid name
+    else:
+        response["MESSAGE"] = f"Successfully added song."
 
     # Return the response in json format
     return jsonify(response)
 
 @app.route('/search/', methods=['GET'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
 def search():
     ### For testing
     # (i) Get a spotify Oauth token from,
@@ -78,6 +126,8 @@ def search():
     query = request.args.get('query', None)
     room  = request.args.get('room',  None)
 
+    print(query + "\n" + room +'\n')
+
     search_response = requests.get(
         "https://api.spotify.com/v1/search",
         params = {
@@ -87,7 +137,7 @@ def search():
         headers = {
             'Accept'        :            'application/json',
             'Content-Type'  :            'application/json',
-            'Authorization' : 'Bearer ' + room_tokens[room],
+            'Authorization' : 'Bearer ' + rooms[room].token,
         }
     )
 
@@ -98,6 +148,21 @@ def search():
             "ERROR"    :     search_response.status_code,
             "MESSAGE:" : f"No results found for {query}",
         })
+
+@app.route('/checkroom/', methods=['GET'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+def checkroom():
+
+    room = request.args.get('room', None)
+
+    response = {}
+
+    if room in rooms:
+        response['exists'] = True
+    else:
+        response['exists'] = False
+
+    return jsonify(response)
 
 @app.route('/post/', methods=['POST'])
 def post_something():
