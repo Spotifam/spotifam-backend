@@ -15,6 +15,7 @@ cors = CORS(app, resources= {
         r"/search":         {"origins": "*"},
         r"/updatequeue":    {"origins": "*"},
         r"/addsong":        {"origins": "*"},
+        r"/checkroom":      {"origins": "*"},
     })
 app.config['CORS_HEADERS'] = 'Content-Type'
 
