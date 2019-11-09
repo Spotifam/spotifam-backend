@@ -191,4 +191,5 @@ def index():
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
     port = int(os.environ.get("PORT", 5000))
+    print("PORT: "+ port)
     app.run(threaded=True, port=port)
