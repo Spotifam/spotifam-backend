@@ -4,6 +4,7 @@ import requests
 import random
 import string
 import json
+import os
 from room import Room
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
@@ -189,4 +190,5 @@ def index():
 
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
-    app.run(threaded=True, port=5000)
+    port = int(os.environ.get(“PORT”, 5000))
+    app.run(threaded=True, port=port)
