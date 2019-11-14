@@ -12,3 +12,6 @@ class Room():
 
     def addToQueue(self, song):
         self.queue.append(song)
+
+    def toDict(self):
+        return {'queue': self.queue, 'token': self.token}

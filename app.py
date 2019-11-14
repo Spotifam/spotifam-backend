@@ -166,6 +166,17 @@ def checkroom():
 
     return jsonify(response)
 
+@app.route('/test/', methods=['GET'])
+@cross_origin(origin='*',headers=['Content-Type','Authorization'])
+def test():
+    test_data = {}
+    for room_id in rooms:
+        test_data[room_id] = rooms[room_id].toDict()
+
+    response = {}
+    response['rooms'] = test_data
+    return jsonify(response)
+
 @app.route('/post/', methods=['POST'])
 def post_something():
     print(request)
