@@ -44,7 +44,6 @@ def createroom():
     rooms[room_id] = room
 
     response = {}
-    resp.headers['Access-Control-Allow-Origin'] = '*'
 
     # Check if user sent a name at all
     if not auth_tok:
@@ -65,11 +64,16 @@ def getqueue():
     room_code = request.args.get("room_code", None)
 
     response = {}
-    resp.headers['Access-Control-Allow-Origin'] = '*'
+    if (room_code in rooms):
+        response['list'] = rooms[room_code].getQueue()
+    else:
+        response['list'] = []
+    response = jsonify(response)
 
-    response["list"] = rooms[room_code].getQueue()
+    r = make_response(response)
+    r.headers['Access-Control-Allow-Origin'] = '*'
 
-    return jsonify(response)
+    return r
 
 @app.route('/updatequeue/', methods=['POST'])
 @cross_origin(origin='*',headers=['Content-Type','Authorization'])
@@ -81,7 +85,6 @@ def updatequeue():
     rooms[room].updateQueue(queue)
 
     response = {}
-    response.headers['Access-Control-Allow-Origin'] = '*'
 
     # Check if user sent a name at all
     if not queue:
@@ -104,7 +107,6 @@ def addsong():
     rooms[room].addToQueue(song)
 
     response = {}
-    resp.headers['Access-Control-Allow-Origin'] = '*'
 
     # Check if user sent a name at all
     if not song:
@@ -163,7 +165,6 @@ def checkroom():
     room = request.args.get('room', None)
 
     response = {}
-    resp.headers['Access-Control-Allow-Origin'] = '*'
 
     if room in rooms:
         response['exists'] = True
